@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
+import './Login.css';
 import { useNavigate } from 'react-router-dom';
-
 
 const Login = () => {
   const navigate = useNavigate();
@@ -17,24 +17,44 @@ const Login = () => {
     }
   };
 
+  const handleSignUp = () => {
+    navigate('/signup'); // Redirect to the Signup page
+  };
+
+  const handleGoogleSignIn = () => {
+    // Add Google Sign-In logic here
+    alert('Google Sign-In clicked!');
+  };
+
   return (
-    <div className="login-container">
-      <h2>Login Page</h2>
-      <form onSubmit={handleLogin}>
-        <input
-          type="text"
-          placeholder="Username"
-          value={credentials.username}
-          onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={credentials.password}
-          onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
-        />
-        <button type="submit">Login</button>
-      </form>
+    <div className="login-page">
+      <div className="login-container">
+
+        <form onSubmit={handleLogin}>
+          <input
+            type="text"
+            placeholder="Username"
+            value={credentials.username}
+            onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={credentials.password}
+            onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
+          />
+          <div className="button-group">
+            <button type="submit">Login</button>
+            <button type="button" onClick={handleSignUp}>Sign Up</button>
+          </div>
+          <button type="button" className="google-signin" onClick={handleGoogleSignIn}>
+            Sign in with Google
+          </button>
+        </form>
+      </div>
+      <div className="welcome-section">
+        
+      </div>
     </div>
   );
 };
