@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { validationResult } from 'express-validator';
 
 const resolveByIndex = (model) => async (req, res, next) => {
     const { id } = req.params;

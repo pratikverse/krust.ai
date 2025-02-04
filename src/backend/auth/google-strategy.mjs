@@ -38,23 +38,18 @@ passport.use(
         },
         async (accessToken, refreshToken, profile, done) => {
             try {
-                const existingUser = await GoogleUser.findOne({
-                    googleId: profile.id,
-                });
+                let user = await GoogleUser.findOne({ googleId: profile.id });
 
-                if (existingUser) {
-                    return done(null, existingUser);
+                if (!user) {
+                    user = new GoogleUser({
+                        username: profile.displayName,
+                        email: profile.emails?.[0]?.value || null,
+                        googleId: profile.id,
+                    });
+                    await user.save();
                 }
 
-                const newUser = new GoogleUser({
-                    username: profile.displayName,
-                    email: profile.emails ? profile.emails[0].value : null,
-                    googleId: profile.id,
-                });
-
-                const savedUser = await newUser.save();
-
-                return done(null, savedUser);
+                return done(null, user);
             } catch (error) {
                 console.error("Error in Google Strategy:", error);
                 done(error);

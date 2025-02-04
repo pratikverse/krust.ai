@@ -2,56 +2,85 @@ import React, { useState } from 'react';
 import './Login.css';
 import { useNavigate } from 'react-router-dom';
 
-const Login = () => {
+const Signup = () => {
   const navigate = useNavigate();
-  const [credentials, setCredentials] = useState({ username: '', password: '' });
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
 
-  const handleLogin = (e) => {
-    e.preventDefault(); // Prevent form submission from reloading the page
-    navigate('/'); // Redirect to the login page
-  };
 
-  const handleSignUp = () => {
-    alert('Welcome to Krust'); // Display the welcome message
-    navigate('/expenses'); // Redirect to the Expense Tracker page
+  const handleSignup = async (e) => {
+    e.preventDefault();
+  
+    try {
+      const response = await fetch('http://localhost:5100/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: `${firstName} ${lastName}`, 
+          email: username, 
+          password: password,
+          phone: "1234567890", 
+        }),
+      });
+  
+      const data = await response.json();
+      if (response.ok) {
+        alert('Signup successful!');
+        navigate('/expenses'); 
+      } else {
+        alert(data.error || 'Signup failed!');
+      }
+    } catch (error) {
+      console.error('Error during signup:', error);
+      alert('Signup failed. Please try again.');
+    }
   };
 
   const handleGoogleSignIn = () => {
-    // Add Google Sign-In logic here
-    alert('Google Sign-In clicked!');
+    window.location.href = 'http://localhost:5100/api/auth/google';
   };
 
   return (
     <div className="login-page">
       <div className="login-container">
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleSignup}>
           <input
             type="text"
             placeholder="First Name"
-            value={credentials.username}
-            onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
           />
           <input
             type="text"
             placeholder="Last Name"
-            value={credentials.username}
-            onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
           />
           <input
             type="text"
             placeholder="Username"
-            value={credentials.username}
-            onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
           />
           <input
             type="password"
             placeholder="Password"
-            value={credentials.password}
-            onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+         <input
+            type="text"
+            placeholder="Phone"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
           />
           <div className="button-group">
-            <button type="submit">Login</button>
-            <button type="button" onClick={handleSignUp}>Sign Up</button>
+            <button type="submit">Sign Up</button>
           </div>
           <button type="button" className="google-signin" onClick={handleGoogleSignIn}>
             Sign in with Google
@@ -59,10 +88,38 @@ const Login = () => {
         </form>
       </div>
       <div className="welcome-section">
-        
+        {/* Add any welcome message or image here */}
       </div>
     </div>
   );
 };
 
-export default Login;
+export default Signup;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

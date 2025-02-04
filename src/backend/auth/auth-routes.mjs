@@ -1,5 +1,6 @@
 import express from "express";
 import { User } from "../models/user-schema.mjs";
+
 import {
     hashPassword,
     comparePassword,
@@ -15,6 +16,13 @@ import {
 } from "../utilities/validation-rules.mjs";
 
 const router = express.Router();
+router.get("/user", (req, res) => {
+    if (req.isAuthenticated()) {
+        res.json({ isAuthenticated: true, user: req.user });
+    } else {
+        res.json({ isAuthenticated: false });
+    }
+});
 
 router.post(
     "/register",
@@ -22,7 +30,11 @@ router.post(
     handleErrors,
     async (req, res) => {
         try {
-            const user = await userModel.create({
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
+            const user = await User.create({
                 ...req.body,
                 password: await hashPassword(req.body.password),
             });
@@ -57,7 +69,7 @@ router.post(
 router.post("/login", loginValidationRules, handleErrors, async (req, res) => {
     try {
         const { email, password } = req.body;
-        const user = await userModel.findOne({ email });
+        const user = await User.findOne({ email });
         if (!user) {
             return res.status(401).json({ error: "Invalid credentials" });
         }
@@ -79,43 +91,22 @@ router.get(
     passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
+// Add this route to handle the Google OAuth redirect
 router.get(
     "/google/redirect",
-    passport.authenticate("google", {
-        successRedirect: "/",
-        failureRedirect: "/login",
-    })
-);
-
-router.get(
-    "/google/redirect",
-    passport.authenticate("google", {
-        successRedirect: "/", // Redirect to home page after successful login
-        failureRedirect: "/login", // Redirect to login page if authentication fails
-    })
-);
-
-router.post("/login", async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        const user = await userModel.findOne({ email });
-        if (!user) {
-            return res.status(400).json({ error: "Invalid credentials" });
+    passport.authenticate("google", { failureRedirect: "/login" }),
+    (req, res) => {
+        if (!req.user) {
+            return res.redirect("http://localhost:3000/login");
         }
-        const isPasswordValid = await comparePassword(password, user.password);
-        if (!isPasswordValid) {
-            return res.status(400).json({ error: "Invalid credentials" });
-        }
-        const { password: _, ...userWithoutPassword } = user.toObject();
-        res.json(userWithoutPassword);
-    } catch (err) {
-        console.log(err);
-        res.status(400).json({ error: err.message });
+
+        // Send user data to frontend
+        res.redirect(
+            `http://localhost:3000/dashboard?user=${encodeURIComponent(
+                JSON.stringify(req.user)
+            )}`
+        );
     }
-});
-router.get(
-    "/google",
-    passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
 export default router;

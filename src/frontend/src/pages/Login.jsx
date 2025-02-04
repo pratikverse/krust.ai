@@ -4,38 +4,51 @@ import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const navigate = useNavigate();
-  const [credentials, setCredentials] = useState({ username: '', password: '' });
+  const [credentials, setCredentials] = useState({ email: '', password: '' });
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Example condition to "authenticate"
-    if (credentials.username === 'user' && credentials.password === 'password') {
-      alert('Login successful!');
-      navigate('/expenses'); // Redirect to the Expense Tracker page
-    } else {
-      alert('Invalid credentials!');
+
+    try {
+      const response = await fetch('http://localhost:5100/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(credentials),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        alert('Login successful!');
+        navigate('/expenses'); 
+      } else {
+        alert(data.error || 'Invalid credentials!');
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+      alert('Login failed. Please try again.');
     }
   };
 
   const handleSignUp = () => {
-    navigate('/signup'); // Redirect to the Signup page
+    navigate('/signup'); 
   };
 
   const handleGoogleSignIn = () => {
-    // Add Google Sign-In logic here
-    alert('Google Sign-In clicked!');
+   
+    window.location.href = 'http://localhost:5100/api/auth/google';
   };
 
   return (
     <div className="login-page">
       <div className="login-container">
-
         <form onSubmit={handleLogin}>
           <input
             type="text"
-            placeholder="Username"
-            value={credentials.username}
-            onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
+            placeholder="Email"
+            value={credentials.email}
+            onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
           />
           <input
             type="password"
@@ -53,10 +66,39 @@ const Login = () => {
         </form>
       </div>
       <div className="welcome-section">
-        
+        {/* Add any welcome message or image here */}
       </div>
     </div>
   );
 };
 
 export default Login;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
